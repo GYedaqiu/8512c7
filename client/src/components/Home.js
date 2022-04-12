@@ -87,7 +87,8 @@ const Home = ({ user, logout }) => {
           convo.id = message.conversationId;
         }
       });
-      setConversations(conversations);
+      const newState = [...conversations];
+      setConversations(newState);
     },
     [setConversations, conversations]
   );
@@ -112,7 +113,8 @@ const Home = ({ user, logout }) => {
           convo.latestMessageText = message.text;
         }
       });
-      setConversations(conversations);
+      const newState = [...conversations];
+      setConversations(newState);
     },
     [setConversations, conversations]
   );
