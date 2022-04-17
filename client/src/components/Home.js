@@ -78,6 +78,8 @@ const Home = ({ user, logout }) => {
     }
   };
 
+
+
   const addNewConvo = useCallback(
     (recipientId, message) => {
       setConversations((prev) => {
@@ -123,6 +125,28 @@ const Home = ({ user, logout }) => {
     [setConversations, conversations]
   );
 
+  const readMessage = (body) => {
+    socket.emit('read-message', {
+      messageId: body.messageId,
+      conversationId: body.conversationId
+    });
+  }
+
+  const updateMessageReadStatus = async (body) => {
+    try {
+      const messageData = await axios.patch('api/messages', body);
+      updateReadStatusInConvo(messageData);
+    } catch (error) {
+      console.error(error);
+    }
+    readMessage(body);
+  }
+
+  const updateReadStatusInConvo = useCallback((messageData) => {
+    // const {messageId, conversationId} = body;
+    console.log(messageData);
+  }, [setConversations, conversations]);
+
   const setActiveChat = (username) => {
     setActiveConversation(username);
   };
@@ -162,6 +186,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('read-message', updateMessageReadStatus);
 
     return () => {
       // before the component is destroyed
@@ -169,8 +194,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', updateMessageReadStatus);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, updateMessageReadStatus, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -222,6 +248,7 @@ const Home = ({ user, logout }) => {
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          updateMessageReadStatus={updateMessageReadStatus}
         />
       </Grid>
     </>

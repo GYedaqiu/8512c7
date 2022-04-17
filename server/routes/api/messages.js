@@ -36,11 +36,37 @@ router.post("/", async (req, res, next) => {
       senderId,
       text,
       conversationId: conversation.id,
+      recipientRead: false
     });
     res.json({ message, sender });
   } catch (error) {
     next(error);
   }
 });
+
+router.patch('/', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+
+    const message = await Message.findOne({
+      where: {id: req.body.messageId}
+    });
+
+    if(!message) {
+      res.sendStats(400)
+    }
+
+    const updateMessage = await message.update({recipientRead: true});
+    if(!updateMessage) {
+      res.sendStatus(403);
+    }
+    console.log(updateMessage.toJSON())
+    res.sendStatus(200).json(updateMessage);
+  } catch (error) {
+    next(error);
+  }
+})
 
 module.exports = router;

@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Typography } from "@material-ui/core";
+import React, { useMemo } from "react";
+import { Box, Typography, Badge } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
 const useStyles = makeStyles((theme) => ({
@@ -26,6 +26,16 @@ const ChatContent = ({ conversation }) => {
   const { otherUser } = conversation;
   const latestMessageText = conversation.id && conversation.latestMessageText;
 
+  const unreadCount = useMemo(() => {
+    if(conversation.id) {
+      const unreadMessages = conversation.messages.filter(message => !message.recipientRead && message.senderId === otherUser);
+      console.log(unreadMessages.length)
+      return unreadMessages.length;
+    }else {
+      return 0;
+    }
+  },[conversation]);
+
   return (
     <Box className={classes.root}>
       <Box>
@@ -35,6 +45,7 @@ const ChatContent = ({ conversation }) => {
         <Typography className={classes.previewText}>
           {latestMessageText}
         </Typography>
+        <Badge badgeContent={unreadCount}></Badge>
       </Box>
     </Box>
   );
