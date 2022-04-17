@@ -44,26 +44,30 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.patch('/', async (req, res, next) => {
+router.patch('/read', async (req, res, next) => {
   try {
     if (!req.user) {
       return res.sendStatus(401);
     }
 
-    const message = await Message.findOne({
-      where: {id: req.body.messageId}
+    const messages = await Message.findAll({
+      where: {
+        senderId: req.body.otherUserId,
+        conversationId: req.body.conversationId
+      }
     });
 
-    if(!message) {
+    if (!messages || messages.length === 0) {
       res.sendStats(400)
     }
 
-    const updateMessage = await message.update({recipientRead: true});
-    if(!updateMessage) {
+    const updateMessages = await Promise.all(messages.map(async message => message.update({ recipientRead: true })));
+
+    if (!updateMessages || updateMessages.length === 0) {
       res.sendStatus(403);
     }
-    console.log(updateMessage.toJSON())
-    res.sendStatus(200).json(updateMessage);
+
+    res.json(updateMessages);
   } catch (error) {
     next(error);
   }

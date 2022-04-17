@@ -30,7 +30,7 @@ const ActiveChat = ({
 
   const conversation = conversations
     ? conversations.find(
-        (conversation) => conversation.otherUser.username === activeConversation
+        (conversation) => conversation.otherUser.username === activeConversation?.otherUsername
       )
     : {};
 

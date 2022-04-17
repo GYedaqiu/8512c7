@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Box, Typography, Avatar } from '@material-ui/core';
 
@@ -31,8 +31,15 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const OtherUserBubble = ({ text, time, otherUser }) => {
+const OtherUserBubble = ({ text, time, otherUser, updateMessageReadStatus, messageId, conversationId, readStatus }) => {
   const classes = useStyles();
+  const otherUserId = otherUser.id;
+
+  useEffect(() => {
+    if (!readStatus) {
+      updateMessageReadStatus({ otherUserId, conversationId });
+    }
+  }, [messageId]);
 
   return (
     <Box className={classes.root}>
