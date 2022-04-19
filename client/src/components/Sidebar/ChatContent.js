@@ -67,7 +67,7 @@ const ChatContent = ({ conversation, activeConversation }) => {
           {latestMessageText}
         </Typography>
       </Box>
-      <Badge badgeContent={unreadCount} className={classes.unreadBadge} invisible={!hasUnread}></Badge>
+      <Badge badgeContent={unreadCount} className={classes.unreadBadge} invisible={!hasUnread} />
     </Box>
   );
 };
