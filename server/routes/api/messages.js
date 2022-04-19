@@ -36,7 +36,6 @@ router.post("/", async (req, res, next) => {
       senderId,
       text,
       conversationId: conversation.id,
-      recipientRead: false
     });
     res.json({ message, sender });
   } catch (error) {
@@ -56,10 +55,6 @@ router.patch('/read', async (req, res, next) => {
         conversationId: req.body.conversationId
       }
     });
-
-    if (!messages || messages.length === 0) {
-      res.sendStats(400)
-    }
 
     const updateMessages = await Promise.all(messages.map(async message => message.update({ recipientRead: true })));
 
