@@ -49,14 +49,12 @@ router.patch('/read', async (req, res, next) => {
       return res.sendStatus(401);
     }
 
-    const messages = await Message.findAll({
-      where: {
+    const updateMessages = await Message.update(
+      { recipientRead: true },
+      {where: {
         senderId: req.body.otherUserId,
         conversationId: req.body.conversationId
-      }
-    });
-
-    const updateMessages = await Promise.all(messages.map(async message => message.update({ recipientRead: true })));
+      }});
 
     if (!updateMessages || updateMessages.length === 0) {
       res.sendStatus(403);
