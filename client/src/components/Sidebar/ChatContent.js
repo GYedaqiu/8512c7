@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { Box, Typography, Badge } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { relativeTimeRounding } from "moment";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -42,18 +41,9 @@ const useStyles = makeStyles((theme) => ({
 const ChatContent = ({ conversation, activeConversation }) => {
   const classes = useStyles();
 
-  const { otherUser } = conversation;
+  const { otherUser, unreadCount } = conversation;
   const latestMessageText = conversation.id && conversation.latestMessageText;
   const isActive = activeConversation?.userId === otherUser.id && activeConversation.username === otherUser?.username ? true : false;
-
-  const unreadCount = useMemo(() => {
-    if (conversation.id) {
-      const unreadMessages = conversation.messages.filter(message => !message.recipientRead && message.senderId === otherUser.id);
-      return unreadMessages.length;
-    } else {
-      return 0;
-    }
-  }, [conversation, otherUser]);
 
   const hasUnread = !isActive && unreadCount !== 0;
 

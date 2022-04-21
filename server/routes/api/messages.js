@@ -49,18 +49,41 @@ router.patch('/read', async (req, res, next) => {
       return res.sendStatus(401);
     }
 
+    const { otherUserId, conversationId, curLastReadId } = req.body;
+    let currentUnread = 0;
+    let lastReadId = curLastReadId;
+
     const updateMessages = await Message.update(
       { recipientRead: true },
-      {where: {
-        senderId: req.body.otherUserId,
-        conversationId: req.body.conversationId
-      }});
+      {
+        where: {
+          senderId: otherUserId,
+          conversationId: conversationId
+        }
+      });
 
     if (!updateMessages || updateMessages.length === 0) {
       res.sendStatus(403);
     }
 
-    res.json(updateMessages);
+    //update unread count in backend
+    const messages = await Message.findAll({
+      where: {
+        senderId: otherUserId,
+        conversationId: conversationId
+      }
+    });
+
+    messages.forEach(message => {
+      const messageJSON = message.toJSON()
+      if (!messageJSON.recipientRead && messageJSON.senderId === otherUserId) {
+        currentUnread += 1;
+      }else if(messageJSON.recipientRead && messageJSON.senderId !== otherUserId) {
+        lastReadId = messageJSON.id;
+      }
+    });
+
+    res.json({ currentUnread, lastReadId });
   } catch (error) {
     next(error);
   }
