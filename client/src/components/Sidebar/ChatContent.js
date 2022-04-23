@@ -63,7 +63,7 @@ const ChatContent = ({ conversation, activeConversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={`${classes.previewText} ${hasUnread && classes.unreadText}`}>
+        <Typography className={`${classes.previewText} ${hasUnread ? classes.unreadText : ''}`}>
           {latestMessageText}
         </Typography>
       </Box>
