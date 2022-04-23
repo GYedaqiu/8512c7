@@ -132,11 +132,11 @@ const Home = ({ user, logout }) => {
       });
     }, [socket]);
 
-  const updateReadStatusInConvo = useCallback((otherUserId, currentUnread, lastReadId) => {
+  const updateReadStatusInConvo = useCallback((otherUserId) => {
     setConversations(prev =>
       prev.map(convo => {
         if (convo.otherUser.id === otherUserId) {
-          const convoCopy = { ...convo, messages: [...convo.messages], unreadCount: currentUnread, lastReadId };
+          const convoCopy = { ...convo, messages: [...convo.messages] };
           convoCopy.messages.forEach(message => {
             if (!message.recipientRead) {
               message.recipientRead = true;
@@ -147,16 +147,16 @@ const Home = ({ user, logout }) => {
         return convo;
       })
     )
-  }, [setConversations]);
+  }, [setConversations, conversations]);
 
-  const updateMessageReadStatus = useCallback(async ({ otherUserId, conversationId, curLastReadId }) => {
+  const updateMessageReadStatus = useCallback(async ({ otherUserId, conversationId }) => {
     try {
-      const { data: { currentUnread, lastReadId } } = await axios.patch('api/messages/read', { otherUserId, conversationId, curLastReadId });
-      updateReadStatusInConvo(otherUserId, currentUnread, lastReadId);
+      await axios.patch('api/messages/read', { otherUserId, conversationId });
+      updateReadStatusInConvo(otherUserId);
     } catch (error) {
       console.error(error);
     }
-    readMessage({ conversationId });
+    readMessage({conversationId});
   }, [readMessage, updateReadStatusInConvo]);
 
   const setActiveChat = ({ otherUsername, otherUserId }) => {
