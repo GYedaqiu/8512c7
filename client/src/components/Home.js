@@ -78,12 +78,14 @@ const Home = ({ user, logout }) => {
     }
   };
 
+
+
   const addNewConvo = useCallback(
     (recipientId, message) => {
       setConversations((prev) => {
         return prev.map((convo) => {
           if (convo.otherUser.id === recipientId) {
-            const convoCopy = { ...convo, messages: [ ...convo.messages, message ] }
+            const convoCopy = { ...convo, messages: [...convo.messages, message] }
             convoCopy.latestMessageText = message.text;
             convoCopy.id = message.conversationId;
             return convoCopy;
@@ -92,7 +94,7 @@ const Home = ({ user, logout }) => {
         });
       })
     },
-    [setConversations, conversations]
+    [setConversations]
   );
 
   const addMessageToConversation = useCallback(
@@ -112,7 +114,7 @@ const Home = ({ user, logout }) => {
 
         return prev.map((convo) => {
           if (convo.id === message.conversationId) {
-            const convoCopy = { ...convo, messages: [ ...convo.messages, message ] }
+            const convoCopy = { ...convo, messages: [...convo.messages, message] }
             convoCopy.latestMessageText = message.text;
             return convoCopy;
           }
@@ -120,11 +122,44 @@ const Home = ({ user, logout }) => {
         });
       })
     },
-    [setConversations, conversations]
+    [setConversations]
   );
 
-  const setActiveChat = (username) => {
-    setActiveConversation(username);
+  const readMessage = useCallback((body) => {
+    socket.emit('read-message', {
+      conversationId: body.conversationId,
+    });
+  }, [socket]);
+
+  const updateReadStatusInConvo = useCallback(({ conversationId }) => {
+    setConversations(prev =>
+      prev.map(convo => {
+        if (convo.id === conversationId) {
+          const convoCopy = { ...convo, messages: [...convo.messages] };
+          convoCopy.messages.forEach(message => {
+            if (!message.recipientRead) {
+              message.recipientRead = true;
+            }
+          })
+          return convoCopy;
+        }
+        return convo;
+      })
+    )
+  }, [setConversations]);
+
+  const updateMessageReadStatus = useCallback(async ({ otherUserId, conversationId }) => {
+    try {
+      await axios.patch('api/messages/read', { otherUserId, conversationId });
+      updateReadStatusInConvo({ conversationId });
+      readMessage({ conversationId });
+    } catch (error) {
+      console.error(error);
+    }
+  }, [updateReadStatusInConvo, readMessage]);
+
+  const setActiveChat = ({ otherUsername, otherUserId }) => {
+    setActiveConversation({ otherUsername, otherUserId });
   };
 
   const addOnlineUser = useCallback((id) => {
@@ -162,6 +197,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
+    socket.on('read-message', updateReadStatusInConvo);
 
     return () => {
       // before the component is destroyed
@@ -169,8 +205,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
+      socket.off('read-message', updateReadStatusInConvo);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, updateReadStatusInConvo, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect
@@ -216,12 +253,14 @@ const Home = ({ user, logout }) => {
           clearSearchedUsers={clearSearchedUsers}
           addSearchedUsers={addSearchedUsers}
           setActiveChat={setActiveChat}
+          activeConversation={activeConversation}
         />
         <ActiveChat
           activeConversation={activeConversation}
           conversations={conversations}
           user={user}
           postMessage={postMessage}
+          updateMessageReadStatus={updateMessageReadStatus}
         />
       </Grid>
     </>

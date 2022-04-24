@@ -24,12 +24,13 @@ const ActiveChat = ({
   conversations,
   activeConversation,
   postMessage,
+  updateMessageReadStatus
 }) => {
   const classes = useStyles();
 
   const conversation = conversations
     ? conversations.find(
-        (conversation) => conversation.otherUser.username === activeConversation
+        (conversation) => conversation.otherUser.username === activeConversation?.otherUsername
       )
     : {};
 
@@ -52,6 +53,8 @@ const ActiveChat = ({
                   messages={conversation.messages}
                   otherUser={conversation.otherUser}
                   userId={user.id}
+                  updateMessageReadStatus={updateMessageReadStatus}
+                  lastReadId={conversation.lastReadId}
                 />
                 <Input
                   otherUser={conversation.otherUser}

@@ -43,4 +43,45 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.patch('/read', async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.sendStatus(401);
+    }
+    const { otherUserId, conversationId } = req.body;
+    let currentUnread = 0;
+
+    const updateMessages = await Message.update(
+      { recipientRead: true },
+      {
+        where: {
+          senderId: otherUserId,
+          conversationId: conversationId
+        }
+      });
+
+    if (!updateMessages || updateMessages.length === 0) {
+      res.sendStatus(403);
+    }
+    //update unread count in backend
+    const messages = await Message.findAll({
+      where: {
+        senderId: otherUserId,
+        conversationId: conversationId
+      }
+    });
+
+    messages.forEach(message => {
+      const messageJSON = message.toJSON()
+      if (!messageJSON.recipientRead && messageJSON.senderId === otherUserId) {
+        currentUnread += 1;
+      }
+    });
+
+    res.json({ currentUnread });
+  } catch (error) {
+    next(error);
+  }
+})
+
 module.exports = router;
