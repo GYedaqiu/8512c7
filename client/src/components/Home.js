@@ -125,17 +125,16 @@ const Home = ({ user, logout }) => {
     [setConversations]
   );
 
-  const readMessage = useCallback(
-    (body) => {
-      socket.emit('read-message', {
-        conversationId: body.conversationId
-      });
-    }, [socket]);
+  const readMessage = useCallback((body) => {
+    socket.emit('read-message', {
+      conversationId: body.conversationId,
+    });
+  }, [socket]);
 
-  const updateReadStatusInConvo = useCallback((otherUserId) => {
+  const updateReadStatusInConvo = useCallback(({ conversationId }) => {
     setConversations(prev =>
       prev.map(convo => {
-        if (convo.otherUser.id === otherUserId) {
+        if (convo.id === conversationId) {
           const convoCopy = { ...convo, messages: [...convo.messages] };
           convoCopy.messages.forEach(message => {
             if (!message.recipientRead) {
@@ -147,17 +146,17 @@ const Home = ({ user, logout }) => {
         return convo;
       })
     )
-  }, [setConversations, conversations]);
+  }, [setConversations]);
 
   const updateMessageReadStatus = useCallback(async ({ otherUserId, conversationId }) => {
     try {
       await axios.patch('api/messages/read', { otherUserId, conversationId });
-      updateReadStatusInConvo(otherUserId);
+      updateReadStatusInConvo({ conversationId });
+      readMessage({ conversationId });
     } catch (error) {
       console.error(error);
     }
-    readMessage({conversationId});
-  }, [readMessage, updateReadStatusInConvo]);
+  }, [updateReadStatusInConvo, readMessage]);
 
   const setActiveChat = ({ otherUsername, otherUserId }) => {
     setActiveConversation({ otherUsername, otherUserId });
@@ -198,7 +197,7 @@ const Home = ({ user, logout }) => {
     socket.on('add-online-user', addOnlineUser);
     socket.on('remove-offline-user', removeOfflineUser);
     socket.on('new-message', addMessageToConversation);
-    socket.on('read-message', updateMessageReadStatus);
+    socket.on('read-message', updateReadStatusInConvo);
 
     return () => {
       // before the component is destroyed
@@ -206,9 +205,9 @@ const Home = ({ user, logout }) => {
       socket.off('add-online-user', addOnlineUser);
       socket.off('remove-offline-user', removeOfflineUser);
       socket.off('new-message', addMessageToConversation);
-      socket.off('read-message', updateMessageReadStatus);
+      socket.off('read-message', updateReadStatusInConvo);
     };
-  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, updateMessageReadStatus, socket]);
+  }, [addMessageToConversation, addOnlineUser, removeOfflineUser, updateReadStatusInConvo, socket]);
 
   useEffect(() => {
     // when fetching, prevent redirect

@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Box, Typography, Badge } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-import { relativeTimeRounding } from "moment";
 
 const useStyles = makeStyles((theme) => ({
   root: {

@@ -56,8 +56,8 @@ io.on("connection", (socket) => {
   });
 
   socket.on("read-message", (body) => {
-    socket.broadcast.emit("read-messsage", {
-      conversationId: body.conversationId
+    socket.broadcast.emit("read-message", {
+      conversationId: body.conversationId,
     })
   });
 });

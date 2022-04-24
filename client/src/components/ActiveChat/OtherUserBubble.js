@@ -39,7 +39,7 @@ const OtherUserBubble = ({ text, time, otherUser, updateMessageReadStatus, messa
     if (!readStatus) {
       updateMessageReadStatus({ otherUserId, conversationId });
     }
-  }, [messageId]);
+  }, [messageId, conversationId, otherUserId, readStatus, updateMessageReadStatus]);
 
   return (
     <Box className={classes.root}>
