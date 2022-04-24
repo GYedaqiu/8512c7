@@ -31,15 +31,15 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const OtherUserBubble = ({ text, time, otherUser, updateMessageReadStatus, messageId, conversationId, readStatus, lastReadId }) => {
+const OtherUserBubble = ({ text, time, otherUser, updateMessageReadStatus, messageId, conversationId, readStatus }) => {
   const classes = useStyles();
   const otherUserId = otherUser.id;
 
   useEffect(() => {
     if (!readStatus) {
-      updateMessageReadStatus({ otherUserId, conversationId, curLastReadId: lastReadId });
+      updateMessageReadStatus({ otherUserId, conversationId });
     }
-  }, [messageId, updateMessageReadStatus, conversationId, otherUserId, readStatus, lastReadId]);
+  }, [messageId, conversationId, otherUserId, readStatus, updateMessageReadStatus]);
 
   return (
     <Box className={classes.root}>

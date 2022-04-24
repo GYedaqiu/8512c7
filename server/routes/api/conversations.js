@@ -21,7 +21,7 @@ router.get("/", async (req, res, next) => {
       attributes: ["id"],
       order: [[Message, "createdAt", "DESC"]],
       include: [
-        { model: Message},
+        { model: Message },
         {
           model: User,
           as: "user1",
@@ -74,7 +74,7 @@ router.get("/", async (req, res, next) => {
       convoJSON.messages.forEach(message => {
         if (!message.recipientRead && message.senderId === convoJSON.otherUser.id) {
           convoJSON.unreadCount += 1;
-        }else if(message.recipientRead && message.senderId !== convoJSON.otherUser.id) {
+        } else if (message.recipientRead && message.senderId !== convoJSON.otherUser.id) {
           convoJSON.lastReadId = message.id;
         }
       });

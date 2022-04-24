@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Typography, Badge } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -41,9 +41,18 @@ const useStyles = makeStyles((theme) => ({
 const ChatContent = ({ conversation, activeConversation }) => {
   const classes = useStyles();
 
-  const { otherUser, unreadCount } = conversation;
+  const { otherUser } = conversation;
   const latestMessageText = conversation.id && conversation.latestMessageText;
   const isActive = activeConversation?.userId === otherUser.id && activeConversation.username === otherUser?.username ? true : false;
+
+  const unreadCount = useMemo(() => {
+    if (conversation.id) {
+      const unreadMessages = conversation.messages.filter(message => !message.recipientRead && message.senderId === otherUser.id);
+      return unreadMessages.length;
+    } else {
+      return 0;
+    }
+  }, [conversation, otherUser]);
 
   const hasUnread = !isActive && unreadCount !== 0;
 
@@ -53,7 +62,7 @@ const ChatContent = ({ conversation, activeConversation }) => {
         <Typography className={classes.username}>
           {otherUser.username}
         </Typography>
-        <Typography className={`${classes.previewText} ${hasUnread && classes.unreadText}`}>
+        <Typography className={`${classes.previewText} ${hasUnread ? classes.unreadText : ''}`}>
           {latestMessageText}
         </Typography>
       </Box>
